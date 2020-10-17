@@ -5,7 +5,9 @@ import (
 	"encoding/base64"
 	"fmt"
 	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 	"time"
 )
 
@@ -45,14 +47,42 @@ func GenerateRandomBytes(n int) ([]byte, error) {
 	return b, nil
 }
 
+func CountDigits(i int) (count int) {
+	for i != 0 {
+
+		i /= 10
+		count = count + 1
+	}
+	return count
+}
+
 func main() {
+	sigs := make(chan os.Signal, 1)
+
+	signal.Notify(sigs,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+		syscall.SIGQUIT)
+
+	go func() {
+		stopsecs := getEnv("STOP_SECS")
+		sig := <-sigs
+		for j := stopsecs; j > 0; j-- {
+			fmt.Printf("Stopping in %d seconds\n", j)
+			time.Sleep(time.Second)
+		}
+		fmt.Println()
+		fmt.Println(sig)
+		os.Exit(127)
+	}()
+
 	iterations := getEnv("NUM_RAND")
 	for i := 0; i < iterations; i++ {
 		key, err := GenerateRandomString(32)
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println(key)
+		fmt.Printf("%*d : %s\n", CountDigits(iterations-1), i, key)
 		time.Sleep(time.Second)
 	}
 }
