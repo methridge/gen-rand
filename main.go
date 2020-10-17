@@ -17,8 +17,6 @@ func getEnv(key string) int {
 			return i
 		}
 	}
-	fmt.Println("Number of iterations not set - 'export NUM_RAND=5'")
-	os.Exit(0)
 	return 0
 }
 
@@ -47,6 +45,7 @@ func GenerateRandomBytes(n int) ([]byte, error) {
 	return b, nil
 }
 
+// CountDigits returns the number of digits in an integer.
 func CountDigits(i int) (count int) {
 	for i != 0 {
 
